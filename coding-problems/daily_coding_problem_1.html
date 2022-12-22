@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Daily Coding Problem #1</title>
+    <link rel="stylesheet" href="../style/style.css">
+    <link rel="stylesheet"
+      href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
+  </head>
+  <body>
+    <header>
+      <h3>Daily Coding Problem #1</h3>
+      <p class="byline">In my (unfinished) post-baccalaureate CS program I took a class on algorithms. At the time I was working a full time job, was a part time student, and caring for a family member with a broken collarbone. All of this was, perhaps, not a suitable environment for retaining the information I have learned. Join me on my journeys through leetcode, hacker rank, Cracking the Coding Interview, and Grokking Modern System Design as I try to retain some of this information in a more relaxed environment.</p>
+      <hr>
+    </header>
+    <div class="longform-body">
+      <p>This problem comes from Daily Coding Problems, a website started by a group of friends who collaboratively worked through algorithm challenges together while prepping for job interviews. They will (conveniently!) send you a daily coding problem which (incoveniently!) has answers behind a paywall. This post is for the first of those problems:</p>
+      <div class="coding-prompt inner-piece">
+        <p>Good morning! Here's your coding interview problem for today.</p>
+        <p>This problem was recently asked by Google.</p>
+        <p>Given a list of numbers and a number k, return whether any two numbers from the list add up to k.</p>
+        <p>For example, given [10, 15, 3, 7] and k of 17, return true since 10 + 7 is 17.</p>
+        <p>Bonus: Can you do this in one pass?</p>
+      </div>
+      <p> So let's attempt to do this. To me, this problem reads like a variation of the TwoSum problem on leetcode, where the difference is that TwoSum asks for the indices of two numbers which add up to k and assures you that you can expect there to be at least one solution. This problem asks you to return a boolean indicating whether or not there are integers that can add up to k, thus undermining leetcode's assumption that there will be a solution.</p>
+      <p>To that end...I'm kind of cheating on this problem because I have solved Two Sum before. So, let's talk about the first, and inefficient, attempt I made. As a note, this will be the solution to LeetCode's Two Sum, as I didn't bother to redo the ineffieicnt way.</p>
+      <pre>
+        <code class="language-python inner-piece">
+        def two_sum(nums, target): 
+          len_nums = len(nums) 
+          left, right = 0, 1 
+          while left != len_nums: 
+            while right != len_nums: 
+              if nums[left] + nums[right] == target: 
+                return [left, right] 
+              right += 1 
+          left += 1
+          right = left + 1
+        </code>
+      </pre>
+      <p>So...why is this inefficient? It's hard to tell immediately, due to my use of a while loop instead of a for loop, but this is essentially a for loop with a secondary nested for loop. The rules of Big O Time Complexity tell us that iterating through a collection is O(n). So this is iterating through a collection which then iterates through a second collection meaning O(n) * O(n), or O(n^2). That's why it's so inefficient time-wise.</p>
+      <p>In order to make this more efficient time-wise, we need to sacrifice some storage space. Not much, to be clear, but some, by storing in a re-accessible way the values already considered. Another way of saying this is, we need to maintain state in some way. In the inefficient solution, the calculation to find if the two integers under consideration add up to the target have no way of knowing if any other value already considered might be the answer. In order to calculate that we need to maintain those values. Consider this solution (which, as a note, is a solution to the Daily Coding Problem version, not the leetcode version):
+      <p>
+      <pre>
+        <code class="language-python inner-piece">
+        def two_sum(nums, target): 
+          hashnums = {}
+          for ind, n in enumerate(nums): 
+            diff = target - n 
+            if diff in hashnums: 
+              return True 
+            hashnums[n] = ind 
+          return False 
+        </code>
+      </pre>
+<p> So this will iterate, at worse, through all the indices of nums once, which, as we know, is O(n). Access to a dictionary (or hashmap, in Java, which seems to be lexically normative for whatever reason) is O(1) so this is O(n) total! Nice! </p>
+      <script src="index.js"></script>
+      <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+  </body>
+</html>

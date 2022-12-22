@@ -1,0 +1,41 @@
+/*HTML Primitives*/
+
+code {
+  background: black;
+  color: pink;
+  overflow-wrap: break-word;
+  text-align: left;
+}
+
+p {
+	min-width: 70%;
+	max-width:  85%;
+}
+
+
+/*Classes*/
+
+.byline {
+	font-style: italic;
+}
+
+.coding-prompt {
+	background-color: grey;
+	color: white;
+	text-align: left;
+}
+
+.inner-piece {
+	display: block;
+	min-width: 65%;
+	padding: 3em;
+}
+
+.longform-body {
+	text-align:  center;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
