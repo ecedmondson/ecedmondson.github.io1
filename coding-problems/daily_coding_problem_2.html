@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Daily Coding Problem #2</title>
+    <link rel="stylesheet" href="../style/style.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
+  </head>
+  <body>
+    <header>
+      <h3>Daily Coding Problem #2</h3>
+      <p class="byline">In my (unfinished) post-baccalaureate CS program I took a class on algorithms. At the time I was working a full time job, was a part time student, and caring for a family member with a broken collarbone. All of this was, perhaps, not a suitable environment for retaining the information I have learned. Join me on my journeys through leetcode, hacker rank, Cracking the Coding Interview, and Grokking Modern System Design as I try to retain some of this information in a more relaxed environment.</p>
+      <hr>
+    </header>
+    <div class="longform-body">
+      <p>This problem comes from Daily Coding Problems, a website started by a group of friends who collaboratively worked through algorithm challenges together while prepping for job interviews. They will (conveniently!) send you a daily coding problem which (incoveniently!) has answers behind a paywall. This post is for the second of those problems:</p>
+      <div class="coding-prompt inner-piece">
+        <p>Good morning! Here's your coding interview problem for today.</p>
+        <p>This problem was asked by Uber.</p>
+        <p>Given an array of integers, return a new array such that each element at index i of the new array is the product of all the numbers in the original array except the one at i.</p>
+        <p>For example, if our input was [1, 2, 3, 4, 5], the expected output would be [120, 60, 40, 30, 24]. If our input was [3, 2, 1], the expected output would be [2, 3, 6].</p>
+        <p>Follow-up: what if you can't use division?</p>
+      </div>
+      <p> So let's attempt to do this. I have seen this problem on LeetCode before, but I had never actually solved it. I did got find the <a href="https://leetcode.com/problems/product-of-array-except-self">leetcode version</a> because they'll provide the test cases for you etc. The inclusion of <i>what if you can't use division?</i> is interesting in so far as an obvious answer is something like this: </p>
+      <pre>
+                    <code class="language-python inner-piece">
+          from functools import reduce
+          # To avoid confusion with itertools.product
+          def multiplicative_product(list_):
+              if not list_:
+                  # 0 does weird stuff to multiplication
+                  return 1
+              return reduce(lambda x, y: x * y, list_)
+
+          def dcp2div(list_):
+            total = multiplicative_product(list_)
+            return [total // x for x in list_]
+        </code>
+                  </pre>
+      <p>So...that works. As long as there aren't any 0s in <i>list_</i> I guess (because you can't divide by zero, which I guess is why the prohibition exists). Assming non-zero indices, it's technically O(n) because O(n) + O(n) == 2O(n) which, in Big O notation, reduces to O(n) (this is because, even though we are still doubling the iteration through n due to the reduce call and the return statement, Big O measures time complexity of total operations as input increases, and so increasing inputs will still grow at a linear rate; I frequently find these points confusing). But it does the very thing the problem asks you not to do, namely: divide. So what might another solution look like? I decided to reuse my code above in a slightly different way: </p>
+      <pre>
+        <code class="language-python inner-piece">
+        from functools import reduce
+
+        # To avoid confusion with itertools.product
+        def multiplicative_product(list_):
+            if not list_:
+                # 0 does weird stuff to multiplication
+                return 1
+            return reduce(lambda x, y: x * y, list_)
+
+        def dcp2div(list_):
+            total = multiplicative_product(list_)
+            return [total // x for x in list_]
+
+
+        def dcp2(list_):
+            left_prod = 1
+            listlen = len(list_)
+            results = [None] * listlen
+            for ind, x in enumerate(list_):
+                right_prod = multiplicative_product(list_[ind +1:listlen])
+                results[ind] = left_prod * right_prod
+                left_prod = left_prod * x
+            return results
+        </code>
+      </pre>
+      <p>This is better, I guess, in so far as it: 1) doesn't use division (a requirement) and won't blow up when you provide a list containing zeroes (try running dcp2div with input like [0, 1, 2, 3, 0, 1] for example). However, when I ran this on LeetCode, it timed out! I suspect this has something to do with the inefficient calculation of right_prod. Interestingly, it is still O(n) because N * O(n) will reduce to...O(n). This is, perhaps, a lesson about how constant time is important to performance in addition to time complexity as input grows. So before trying to fix the time out, let's talk about the approach of dcp2.</p>
+      <p>Assume you have an input list [1, 2, 3, 4]. You must calculate the product every value except i. In order to do so, you need to multiply together everything to the left and everything to the right of your current i. This particular input has a max index of 3. So, for example:
+      </p>
+      <div class="explanatory-blurb inner-piece">
+        <p>index 0 = index 1 * index 2 * index 3</p>
+        <p>index 1 = index 0 * index 2 * index 3</p>
+        <p>index 2 = index 0 * index 1 * index 3</p>
+        <p>index 3 = index 0 * index 1 * index 2</p>
+      </div>
+      <p>Since we normally iterate left to right, or lower index to higher index, maintaining the state of <i>left_prod</i> is relatively easy to do without division. Simply set the value to 1 (which causes no multiplicative issues and is basically an identity call) and then update left_prod as you iterate. Finding the value of <i>right_prod</i> is more difficult to do while maintaining state and following the prohibition against division. So how do we do this in a more efficient way? I can think of an approach that's basically 3O(n) or...again...O(n). Let's take a look:</p>
+      <pre>
+        <code class="language-python inner-piece">
+          from functools import reduce
+
+          # To avoid confusion with itertools.product
+          def multiplicative_product(list_):
+              if not list_:
+                  return 1
+              return reduce(lambda x, y: x * y, list_)
+
+          def dcp2div(list_):
+              total = multiplicative_product(list_)
+              return [total // x for x in list_]
+
+
+          def dcp2slow(list_):
+              left_prod = 1
+              listlen = len(list_)
+              results = [None] * listlen
+              for ind, x in enumerate(list_):
+                  right_prod = multiplicative_product(list_[ind +1:listlen])
+                  results[ind] = left_prod * right_prod
+                  left_prod = left_prod * x
+              return results
+
+
+          def dcp2(list_):
+              lenlist = len(list_)
+              left_prod = [1] * lenlist
+              right_prod = [1] * lenlist
+              result = [1] * lenlist
+              product = 1
+              for ind in range(0, lenlist):
+                  left_prod[ind] = product
+                  product = product * list_[ind]
+              product = 1
+              for ind in range(lenlist -1, -1, -1):
+                  right_prod[ind] = product
+                  product = product * list_[ind]
+              for ind in range(lenlist):
+                  result[ind] = left_prod[ind] * right_prod[ind]
+              return result
+        </code>
+      </pre>
+      <p> This operates very similarly to what I have now called <i>dcp2slow</i>. As a reminder, state management for left_prod was explained above, now it's simply been stored in a list. The idea here is to do the same for right_prod, again, in a list.</p>
+      <p> So this is O(n) still due to how we reduce time complexities. Additionally, when you consider constant time, this only calculates the right_prod once. I occasionally forget how <i>range(start, stop, increment)</i> works for the non-straightforward cases, but that's something I guess I can look up. This works as a solution for the DCP #2 requirements but LeetCode has another one: try to do it without any additional space complexity! I don't think I will.</p>
+      <script src="index.js"></script>
+      <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+  </body>
+</html>

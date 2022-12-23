@@ -20,8 +20,14 @@ p {
 }
 
 .coding-prompt {
-	background-color: grey;
+	background-color: #4d6e8f;
 	color: white;
+	text-align: left;
+}
+
+.explanatory-blurb {
+	background-color: #4d8f59;
+	color: #daecdd;
 	text-align: left;
 }
 
