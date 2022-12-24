@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Leetcode #43</title>
+    <link rel="stylesheet" href="../style/style.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
+  </head>
+  <body>
+    <header>
+      <h3>Leetcode #2</h3>
+      <p class="byline">In my (unfinished) post-baccalaureate CS program I took a class on algorithms. At the time I was working a full time job, was a part time student, and caring for a family member with a broken collarbone. All of this was, perhaps, not a suitable environment for retaining the information I have learned. Join me on my journeys through leetcode, hacker rank, Cracking the Coding Interview, and Grokking Modern System Design as I try to retain some of this information in a more relaxed environment.</p>
+      <hr>
+    </header>
+    <div class="longform-body">
+      <p>This problem comes from Leetcode, in the Level 1 section of the 75 daily practice problems. If you would like to solve this problem yourself, or read any of the user-contributed discussion around the problem, you can find the problem <a href="https://leetcode.com/problems/add-two-numbers/">here.</a> Here's the prompt:</p>
+      <div class="coding-prompt inner-piece">
+        <p>You are given two non-empty linked lists representing two non-negative integers. The digits are stored in reverse order, and each of their nodes contains a single digit. Add the two numbers and return the sum as a linked list.</p>
+        <p>You may assume the two numbers do not contain any leading zero, except the number 0 itself.</p>
+      </div>
+      <p> Linked lists! A concept that, to me anyway, makes a whole lot more sense in something like, say, C than in Python. Nothing I can do about that.</p>
+      <p>The thing that stands out to me on this one is that <i>the digits are stored in reverse order</i>. So that means if we have a Linked List such that Node 1 = 1, Node 2 = 2, and Node 3 = 3, the number represented by that Linked List is 321, NOT 123. I think this actually makes this easier, because this is how I was taught to do math in elementary school. So, for example:</p>
+      <div class="explanatory-blurb inner-piece">
+        <p>  3 2 7 </p>
+        <p>+
+        <p>  4 5 6 </p>
+        <p> ------- </p>
+        <p>  ? ? ?  </p>
+        <p> Step 1: start with ones yielded 7 + 6 = 13. Carry the tens so you get:</p>
+        <p>    1   </p>
+        <p>  3 2 7 </p>
+        <p>+
+        <p>  4 5 6 </p>
+        <p> ------- </p>
+        <p>  ? ? 3  </p>
+        <p> Step 2: Add the tens, yielding 5 + 2 = 7 and add the remainder yielding 7 + 1 = 8</p>
+        <p>    1   </p>
+        <p>  3 2 7 </p>
+        <p>+
+        <p>  4 5 6 </p>
+        <p> ------- </p>
+        <p>  ? 8 3  </p>  
+        <p> And so on and so forth.</p>      
+      </div>
+      <p>The reason I think this is easier than, that is, to have the digits in reverse order, is that
+      we can do the addition and keep track of the remainder in the same order we would calculate them manually. Additionally, this is the order the LinkedList wants us to return them. This means we can simply find the value, add that value to a Node, and return a LinkedList with the sum. This is a lot easier than, say, keeping track of which digit we're calculating (so for example, the digit from the 7 + 6 was 3 so we need 3 * 1 and the digit from 5 + 2 +1 was 8, but adding 3 and 8 gives us 11...not 83, so you actually need 8 * 10).</p>
+      <p>I did a pretty decent first solution without looking at anyone else's solution. Here's what I came up with:</p>
+      <pre>
+        <code class="language-python inner-piece">
+          def find_remainder(val):
+              if val < 10:
+                  return 0, val
+              if val == 10:
+                  return 1, 0
+              if val > 10:
+                  return 1, val - 10
+
+          def a2n(ll1, ll2):
+              remainder = 0
+              result = ListNode("dummy")
+              dummy = result
+              while ll1 or ll2:
+                  carryover, sum_ = find_remainder(getattr(ll1, "val", 0) + getattr(ll2, "val", 0) + remainder)
+                  result.next = ListNode(sum_)
+                  result = result.next
+                  remainder = carryover
+                  ll1 = getattr(ll1, "next", None)
+                  ll2 = getattr(ll2, "next", None)
+              if remainder:
+                  result.next = ListNode(remainder)
+              return dummy.next
+        </code>
+      </pre>
+      <p>According to Leetcode, this runtime beats 87% of solutions submitted in Python3. That's cool, I guess. What don't I like about this? A lot. First of all, I feel  like my <i>find_remainder</i> function could be better. I'm also playing a bit fast and loose with the getattrs here. That's a benefit of Python that might not be available to me in other languages, but I'm just going to roll with it for now. The reason I call these things out is not because they're <i>bad</i> per se, it's just that, usually, when I find myself doing things like this, it means that I've missed something about the solution that more algorithimically or mathematically talented thinkers catch.</p>
+      <script src="index.js"></script>
+      <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+  </body>
+</html>

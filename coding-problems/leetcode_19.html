@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Leetcode #19</title>
+    <link rel="stylesheet" href="../style/style.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
+  </head>
+  <body>
+    <header>
+      <h3>Leetcode #19</h3>
+      <p class="byline">In my (unfinished) post-baccalaureate CS program I took a class on algorithms. At the time I was working a full time job, was a part time student, and caring for a family member with a broken collarbone. All of this was, perhaps, not a suitable environment for retaining the information I have learned. Join me on my journeys through leetcode, hacker rank, Cracking the Coding Interview, and Grokking Modern System Design as I try to retain some of this information in a more relaxed environment.</p>
+      <hr>
+    </header>
+    <div class="longform-body">
+      <p>This problem comes from Leetcode, in the Level 2 section of the 75 daily practice problems. If you would like to solve this problem yourself, or read any of the user-contributed discussion around the problem, you can find the problem <a href="https://leetcode.com/problems/remove-nth-node-from-end-of-list">here.</a> Here's the prompt:</p>
+      <div class="coding-prompt inner-piece">
+        <p>YGiven the head of a linked list, remove the nth node from the end of the list and return its head.</p>
+        <p>Example 1: <img src="https://assets.leetcode.com/uploads/2020/10/03/remove_ex1.jpg" alt="leetcode_19_ex_1" width="500" height="333"></p>
+      </div>
+      <p> Linked lists again. However, to solve this one, I ended up using one of those "algorithm patterns" I originally learned from solving array/list/string problems: having two pointers, where one pointer moves fast and the other pointer moves slow.</p>
+      <p>I did a pretty decent first solution without looking at anyone else's solution. Here's what I came up with:</p>
+      <pre>
+        <code class="language-python inner-piece">
+        class Solution:
+            def removeNthFromEnd(self, head: Optional[ListNode], n: int) -> Optional[ListNode]:
+                dummy = ListNode(0)
+                dummy.next = head
+                slow, fast = dummy, dummy
+
+          # fast runner moves n step first
+                for i in range(n):
+                    fast = fast.next
+            # slow and fast moves together
+                while fast.next:
+                    slow, fast = slow.next, fast.next
+
+                slow.next = slow.next.next
+                return dummy.next
+        </code>
+      </pre>
+      <p>According to Leetcode, this runtime beats 92.97% of solutions submitted in Python3. That's cool, I guess. I don't think it is immediately obvious why exactly this solution works, so let's explain this a little bit more.</p>
+      <p>The first thing to draw attention to here is that, even though I don't have the API listed in the code blurb above, the implementation of <i>ListNode</i> objects has a <i>next</i> attribute, but not a <i>prev</i> attribute. Leetcode challenges always seem (at least so far as I have seen) to have this API for Linked List Nodes. It is odd to me, as when I was in my post-bac and having to implement Linked Lists myself, I always had to implement a prev. I like prev! Anyway, there is <i>prev</i>.</p>
+      <p>The implication of no prev (and no other identifying attributes, for example a <i>head</i> marker, or a Node.prev == None) means that we need to be able to have something that identifies head. Theoretically...we have this already, right? the <i>head</i> value that is passed in in the function call. However, this ended up failing one of the test cases. Consider this:</p>
+      <pre>
+        <code class="language-python inner-piece">
+          def print_memory_location(obj, st_id=None):
+              st_id = st_id or "Obj"
+              print(f"{st_id}: {hex(id(obj))}")
+
+          class Solution:
+              def removeNthFromEnd(self, head: Optional[ListNode], n: int) -> Optional[ListNode]:
+                  dummy = ListNode(0)
+                  print_memory_location(head, st_id="head")
+                  dummy.next = head
+                  head_ptr = head
+                  print_memory_location(dummy.next, st_id="dummy next")
+                  print_memory_location(head_ptr, st_id="head_ptr")
+                  print()
+                  slow, fast = dummy, dummy
+
+            # fast runner moves n step first
+                  for i in range(n):
+                      fast = fast.next
+              # slow and fast moves together
+                  while fast.next:
+                      slow, fast = slow.next, fast.next
+
+                  slow.next = slow.next.next
+                  print("At the end:")
+                  print_memory_location(dummy.next, st_id="dummy next")
+                  print_memory_location(head_ptr, st_id="head_ptr")
+                  print_memory_location(head, st_id="head")
+                  print()
+                  return head
+        </code>
+      </pre>
+      <p>This printing helper function which prints the memory address of an object passed to it is helpful to understand what's going on. Consider the input: head = [1], n = 1. In this input we have a linked list of length 1 and n = 1, meaning we need to remove the head. The implementation we have implemented works by removing <i>next</i> pointers, not by deletion altogether. As a result, in the input we're considering now, when n = 1, which is also head, is removed, the test case fails. This is the output from that test case:</p>
+      <div class="explanatory-blurb inner-piece">
+        <p>head: 0x7f970832b5e0</p>
+        <p>dummy next: 0x7f970832b5e0</p>
+        <p>head_ptr: 0x7f970832b5e0</p>
+        <p>At the end:</p>
+        <p>dummy next: 0x9143a0</p>
+        <p>head_ptr: 0x7f970832b5e0</p>
+        <p>head: 0x7f970832b5e0</p>
+      </div>
+      <p>As a reminder, for this input, <i>we can't return the head node because we're removing it</i>. Only one case, the <i>dummy.next</i> call actually points to a different memory address. The <i>head_ptr</i> and the <i>head</i> value passed in the function call both still point to the <i>head</i> node, because it was never de-allocated, only ever had it's pointers re-arranged. That's why in this particular case we need to the dummy.next. As a note, using <i>head</i> or <i>head_ptr</i>passed succesfully for the other cases.</p>
+      <p>I think this problem sort of gets into why I find Linked List problems so odd in Python, namely, that all of my learning about LinkedLists was categorically grouped not only with understanding data structures but also with memory management in C. So it is odd to solve these challenges in a language that manages memory for you.</p>
+      <p>As a final note, I think I should probably discuss the solution's time complexity. The allocation of the dummy and setting the dummy's next to head are all just constant time operations, or O(1). There are then two loops, one a for loop, the other a while, but they're not nested so it is dependent upon input size, or O(n) + O(n) = 2O(n) which, as we know, reduces down to O(n).</p>
+      <script src="index.js"></script>
+      <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+  </body>
+</html>

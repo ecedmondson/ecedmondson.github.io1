@@ -1,47 +1,60 @@
 /*HTML Primitives*/
-
-code {
-  background: black;
-  color: pink;
-  overflow-wrap: break-word;
-  text-align: left;
+ code {
+     background: black;
+     color: pink;
+     overflow-wrap: break-word;
+     text-align: left;
 }
-
-p {
-	min-width: 70%;
-	max-width:  85%;
+ p {
+     min-width: 70%;
+     max-width: 85%;
 }
-
-
 /*Classes*/
-
-.byline {
-	font-style: italic;
+ .byline {
+     font-style: italic;
 }
-
-.coding-prompt {
-	background-color: #4d6e8f;
-	color: white;
-	text-align: left;
+ .coding-prompt {
+     background-color: #4d6e8f;
+     color: white;
+     text-align: left;
 }
-
-.explanatory-blurb {
-	background-color: #4d8f59;
-	color: #daecdd;
-	text-align: left;
+ .collapse-fluid {
+     display: none;
 }
-
-.inner-piece {
-	display: block;
-	min-width: 65%;
-	padding: 3em;
+.collapsible {
+     margin: .75em;
 }
-
-.longform-body {
-	text-align:  center;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
+ .explanatory-blurb {
+     background-color: #4d8f59;
+     color: #daecdd;
+     text-align: left;
 }
-
+ .inner-piece {
+     display: block;
+     min-width: 65%;
+     padding: 3em;
+}
+ .longform-body {
+     text-align: center;
+     display: flex;
+     flex-direction: column;
+     justify-content: center;
+     align-items: center;
+}
+ .main-layout {
+     display: flex;
+     flex-direction: row;
+     margin-left: .5em;
+}
+ .side-nav {
+     margin: 2em;
+     padding: .5 em;
+     text-align: center;
+}
+ .side-nav :nth-child(even) {
+     background-color: #ad9252;
+}
+ .side-nav :nth-child(odd) {
+     background-color: #c8c1bc;
+}
+ 
