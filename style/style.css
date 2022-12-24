@@ -9,6 +9,12 @@
      min-width: 70%;
      max-width: 85%;
 }
+
+body {
+	min-width: 100%;
+    min-height: 100%;
+    margin: 0px;
+}
 /*Classes*/
  .byline {
      font-style: italic;
@@ -18,11 +24,16 @@
      color: white;
      text-align: left;
 }
- .collapse-fluid {
+.collapse-fluid {
      display: none;
 }
+.collapse-sticky{
+	flex-grow: 1;
+}
 .collapsible {
-     margin: .75em;
+   align-self: flex-start;
+   display: flex;
+   flex-direction: column;
 }
  .explanatory-blurb {
      background-color: #4d8f59;
@@ -41,20 +52,36 @@
      justify-content: center;
      align-items: center;
 }
- .main-layout {
+.main-layout {
      display: flex;
      flex-direction: row;
-     margin-left: .5em;
+     flex-wrap:  nowrap;
+     margin-top: .25em;
+     margin-left: .25em;
+	min-width: 100%;
+    min-height: 100%;
 }
- .side-nav {
-     margin: 2em;
+.side-nav {
      padding: .5 em;
      text-align: center;
+     display: flex;
+     flex-direction: column;
+     background-color: #C1A29B;
 }
- .side-nav :nth-child(even) {
-     background-color: #ad9252;
+.nav-header {
+  text-decoration: underline;
+  background-color: #C1A29B;
+  margin-bottom: .5em;
+  padding: .5em;
 }
- .side-nav :nth-child(odd) {
+
+ .nav-options-container :nth-of-type(even) div {
+     background-color: #C1A29B;
+     padding: .75em;
+}
+
+ .nav-options-container :nth-of-type(odd) div {
      background-color: #c8c1bc;
+     padding: .75em;
 }
  
