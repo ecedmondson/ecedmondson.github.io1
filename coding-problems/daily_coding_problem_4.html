@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Daily Coding Problem #4</title>
+    <link rel="stylesheet" href="../style/style.css">
+    <link rel="stylesheet"
+      href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
+  </head>
+  <body>
+    <header>
+      <h3>Daily Coding Problem #4 and Leetcode #41</h3>
+      <p class="byline">In my (unfinished) post-baccalaureate CS program I took a class on algorithms. At the time I was working a full time job, was a part time student, and caring for a family member with a broken collarbone. All of this was, perhaps, not a suitable environment for retaining the information I have learned. Join me on my journeys through leetcode, hacker rank, Cracking the Coding Interview, and Grokking Modern System Design as I try to retain some of this information in a more relaxed environment.</p>
+      <hr>
+    </header>
+    <div class="longform-body">
+      <p>This problem comes from Daily Coding Problems, a website started by a group of friends who collaboratively worked through algorithm challenges together while prepping for job interviews. They will (conveniently!) send you a daily coding problem which (incoveniently!) has answers behind a paywall. This post is for the first of those problems:</p>
+      <div class="coding-prompt inner-piece">
+        <p>Good morning! Here's your coding interview problem for today.</p>
+
+        <p>This problem was asked by Stripe.</p>
+
+        <p>Given an array of integers, find the first missing positive integer in linear time and constant space. In other words, find the lowest positive integer that does not exist in the array. The array can contain duplicates and negative numbers as well.</p>
+
+        <p>For example, the input [3, 4, -1, 1] should give 2. The input [1, 2, 0] should give 3.</p>
+
+        <p>You can modify the input array in-place.</p>
+      </div>
+      <p>I have never solved this problem before, or even heard of it. Daily Coding Problems calls this a <i>medium</i> and, after googling some of the pertinent wording, I found that LeetCode calls this a <i>hard</i> problem. LeetCode includes <a href="https://leetcode.com/problems/first-missing-positive/">an additional constraint</a>: the solution must run in O(n) time.</p>
+      <p>I went into this problem at first thinking that maybe I needed to sort the list, but then, I realized, since I'm operating in Python, I can do something much simpler: counting and membership inclusion. Basically, since we don't care about the negatives, only the positives, and we know that the lowest positive integer is 1, you can iteratively check each positive integer starting at 1 and the first not present in the list is the return value.</p>
+      <p>Since I'm solving all of these in Python, my initial inclination is to do something like this:</p>
+      <pre>
+        <code class="language-python inner-piece">
+          def fmp(nums):
+            lowest_positive = 1
+            while True:
+              if lowest_positive not in nums:
+                return lowest_positive
+              lowest_positive += 1
+        </code>
+      </pre>
+      <p>I do think this solution gets everything you need for the Daily Coding Problem version. I didn't even need to modify the array in place. What about the LeetCode requirements? Is this O(n)? I guess it depends on the Python Implementation of <i>Obj.__contains__(item)</i> (also known as the <a href="https://docs.python.org/3/reference/expressions.html#membership-test-details">membership test</a>. According to the <a href="https://wiki.python.org/moin/TimeComplexity"> Python wiki</a>, this operation is O(n), so it seems to be O(n). Of course, it's one of those weird cases where O(n) is really KO(n) which reduces to O(n) where K is the count of positive integers less than the lowest positive integer. This means, that, once again, constant time operations are important for O(n) complexity. &#128557; (Hilariously: the input that failed was pretty much set up and designed to be the worst-case runtime for a solution like mine.)</p>
+      <p>When I think about it, I should have known something like that might not have been the most time efficient solution because it reminds me of when I might have to implement something like Python's membership inclusion test in C for my post-bac. C doesn't have a built-in membership inclusion operator, which means that the most basic attempt to do this requires iterating at O(n) time complexity through every object in an array. Hilariously, this is <i>almost exactly</i> what Python does. You can take a look at that implementation <a href="https://github.com/python/cpython/blob/a87c46eab3c306b1c5b8a072b7b30ac2c50651c0/Objects/listobject.c#L440">here</a>. (Nota bene: pay attention to the test expression clause in that C for loop.)</p>
+      <p>So, how can we make this faster? Should we go back to sorting and then iterating? If so, how do we handle dupes, i.e. cases where nums = [-3, 0, 1, 1, 1, 2, 2, 3]. Typecast to set? Only increment under certain conditions? Sorting will be O(nlogn) and finding the value will be O(n) resulting in O(nlogn) so I'm not sure if that option will obey LeetCode's O(n) requirement. I went ahead and implemented something like that for consistency's sake:</p>
+      <p>
+      <pre>
+        <code class="language-python inner-piece">
+          def fmp(nums):
+            nums.sort()
+            lowest_positive = 1
+            if lowest_positive not in nums:
+                return lowest_positive
+            lowest_index = nums.index(lowest_positive)
+            for i in range(lowest_index, len(nums)):
+                if nums[i] > lowest_positive:
+                    lowest_positive += 1
+                if nums[i] != lowest_positive:
+                    return lowest_positive
+            return lowest_positive + 1
+        </code>
+      </pre>
+<p>A few notes on this solution before considering time-complexity: as we have already seen, sorting isn't technically necessary, though it is necessary for this particular solution (iterating through the indices). The return value on the last line is <i>lowest_positive + 1</i>. Why? Consider the input <i>list = [1,2,3,4,5]</i>. The first missing positive of this input is actually a value outside of the assigned indices of the list, so the correct answer, after iterating through all of the sorted values, is <i>nums[len(nums) - 1] + 1</i>. This is a worst case scenario. Most cases will probably be caught by <i>if nums[i] != lowest_positive</i>. Additionally, the first <i>if</i> block in the <i>for</i> loop handles repitions without having to typecast to a set.</p>
+<p>This actually passes LeetCode's solution timer, but, hilariously, not the LeetCode's prompt's time constraint. The reason it passes the solution timer is because, as I mentioned, test case 171 was sort of designed to not work with my first solution (large n, large first missing positive). The sorting solves that. But, if we revisit the Python wiki time complexity link from above we know that the in-place sort is O(nlogn). That first if is O(n) and then the for loop is O(n) as well. This is not an O(n) solution. It passes though. I wish LeetCode had a Big O charting feature (maybe it does in the paid version?).</p>
+<p>So we have two working solutions. Technically this second solution <i>also</i> works for the Daily Coding Problem's requirements because it only modifies the array in-place! Yay for <i>List.sort()</i>. But it isn't O(n).</p>
+<p>It's beginning to seem like the "hard" or "medium" part of this problem is being able to combine O(n) runtime with O(1) space-complexity. I think a lot of the idea of the second approach can be used to solve the problem. The key here is to think about what the answer is: not a negative and either the first missing positive of the set of values or the value of <i>max(sorted_nums) + 1</i>. If you can figure out how to find those values without either a) calling an "expensive" in-place sort on the entire input or b) using an additional data structure, then you have you answer. Doing so gives you something like this: </p>
+      <pre>
+        <code class="language-python inner-piece">
+          def fmp(nums):
+            lenn = len(nums)
+            for i in range(lenn):
+                if nums[i] <= 0:
+                    nums[i] = float("inf")
+            for i in range(lenn):
+                absval = abs(nums[i])
+                if 1 <= absval <= lenn:
+                    if nums[absval - 1] > 0:
+                        nums[absval - 1] *= -1
+            for i in range(1, lenn + 1):
+                if nums[i - 1] >= 0:
+                    return i
+            return lenn + 1
+        </code>
+      </pre>
+  <p>Tachame de disco rayado, but as we know, O(n) + O(n) + O(n) reduces down to O(n) so this is still O(n) despite all the loops. Also, it doesn't sort (since we didn't need that) and uses the input array itself to keep track of things. What's going on here? The assignment of <i>lenn</i> to the length is constant time and is mostly to avoid calling <i>len()</i> over and voer again. The first for loop finds all negatives and zeroes, which we have already pointed out aren't necessary, and sets them to positive infinity, or, basically, an invalid return value. A list will have a final index, not infinite indices, so this value is essentially saying "this will never be the answer". The next step is to iterate all the indices and find if the value is greater than 1 (which is the minimum value for a first missing positive), and the length of nums (which is the maximum value for a first missing positive). If so, then the value there at that index is made negative (the greater than zero check is a way of dealing with duplicates). Why make it negative? What information does this operation provide us in finding the answer? The negative and positive, at this point, is basically functioning as an alternative boolean implementation. A boolean in the traditional sense is not an ontological expression (as my background might bias me towards) rather an expression of data where the data may have only one of exactly two values. Traditionally we think of booleans as True and False, but there's nothing to say that any other binary can't work with a boolean. In this case, negative and positive. An integer can be exactly negative or exactly positive, but it can't be both.</p>
+  <p>So what does the negative provide us in this particular case? It has to do with the index that is being set to negative. This is why we take the absolute value too (because negative indexing, though possible in Python, doesn't help us). Remember, if the absolute value of a number is not within the specified range, then it is greater than length (meaning it can't be the first missing positive because at max that is the length value), but it if is within length, it <i>also</i> can't be the first missing positive because...well...it's there! We indicate this by providing a boolean (negative) at the index corresponding to that value. So essentially, the integer value at that index doesn't really matter except as a way of storing boolean state via the negative or positive value. If a value is negative, that means the <i>index</i> under consideration is not the first missing positive. If it's positive, then <i>that index is</i> the first missing positive (because we are iterating in the range of 1 to length) because we only care about what integer the index evaluates to, not the particular value at that index.</p>
+  <p>This problem is hard, I think, at the end, because it requires you to know a few things that are more computer sciency: what exactly a list/array is doing with it's indices, what a boolean really is, and some basic counting logic that's technically math but helpful for programming as well. I will be honest, I did not get this hard solutino all by myself and can thank the folks at <a href="https://www.google.com/search?q=first+missing+positive&oq=first+missing+positive&aqs=chrome.0.69i59j0i512l4j69i60l3.2377j0j7&sourceid=chrome&ie=UTF-8#fpstate=ive&vld=cid:247c56e0,vid:8g78yfzMlao">Neetcode</a> for the explanation. I did however modify their solution in a way that I think is better (the infinity makes it more efficient) and think my explanation is a bit better because I explain the boolean and state aspects. Better may be too strong a word. My explanation makes more sense to me and, in the end, that's what matters.</p>
+      <script src="index.js"></script>
+      <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+  </body>
+</html>
