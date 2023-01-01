@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Leetcode #217</title>
+    <link rel="stylesheet" href="../style/style.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
+  </head>
+  <body>
+    <header>
+      <h3>Leetcode #217</h3>
+      <p class="byline">In my (unfinished) post-baccalaureate CS program I took a class on algorithms. At the time I was working a full time job, was a part time student, and caring for a family member with a broken collarbone. All of this was, perhaps, not a suitable environment for retaining the information I have learned. Join me on my journeys through leetcode, hacker rank, Cracking the Coding Interview, and Grokking Modern System Design as I try to retain some of this information in a more relaxed environment.</p>
+      <hr>
+    </header>
+    <div class="longform-body">
+      <p>This problem comes from Leetcode and was the problem of the day on 1/1/2023, a day that I strangely felt new-years-resolutiony. Luckily Leetcode was gentle to me and gave me an <i>easy</i> tiered array/string and hashing problem:</p>
+      <div class="coding-prompt inner-piece">
+        <p>Given a pattern and a string s, find if s follows the same pattern.
+
+Here follow means a full match, such that there is a bijection between a letter in pattern and a non-empty word in s.</p>
+      </div>
+      <p>I think there are two  main "tricks" here: 1) looking up bijection in the dictionary and 2)  that we have to double hash. Consider, for example, the input provided by leetcode <i>pattern="abba"</i> and <i>s="dog cat cat dog"</i>. This is a proper follow and you can actually get away with single hashing. But that's the trick! If you take a slightly more complicated input <i>pattern="abba"</i> and <i>s="dog dog dog dog"</i> and only hash unidirectionally, then your answer is wrong. For example, this (incorrect) solution:</p>
+      <pre>
+        <code class="language-python inner-piece">
+          class Solution:
+              def wordPattern(self, pattern: str, s: str) -> bool:
+                  splits = s.split(" ")
+                  if len(pattern) != len(splits):
+                      return False
+                  # can assume same lengths
+                  lengths = len(pattern)
+                  patternmap = {}
+                  for i in range(lengths):
+                      p, w = pattern[i], splits[i]
+                      if p in patternmap and patternmap[p] != w:
+                          return False
+                      patternmap[p] = w
+                  return True
+        </code>
+      </pre>
+      <p>So, yeah, I fell for the trick and my input failed. I realized immediately what had happened and amended the problem:</p>
+      <pre>
+        <code class="language-python inner-piece">
+          class Solution:
+              def wordPattern(self, pattern: str, s: str) -> bool:
+                  splits = s.split(" ")
+                  if len(pattern) != len(splits):
+                      return False
+                  # can assume same lengths
+                  lengths = len(pattern)
+                  patternmap = {}
+                  wmap = {}
+                  for i in range(lengths):
+                      p, w = pattern[i], splits[i]
+                      if p in patternmap and patternmap[p] != w:
+                          return False
+                      if w in wmap and wmap[w] != p:
+                          return False
+                      wmap[w] = p
+                      patternmap[p] = w
+                  return True
+        </code>
+      </pre>
+      <p>This is O(n) time complexity with 2O(n) space-complexity...or as I like to call it...O(n).</p>
+      <p>I know this was an "easy" problem, but it was encouraging to be able to find a solution to it all by myself and relatively easily, mostly because I just jumped into it on Leetcode instead of using a guided program like Neetcode, Grokking or Daily Coding Problem. I did later look at my solution compared to other, smarter people's and it looks like I am pretty spot on. That's encouraging because it's solid proof that you can learn these patterns.</p>
+      <script src="index.js"></script>
+      <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+  </body>
+</html>

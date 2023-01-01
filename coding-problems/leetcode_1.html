@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Leetcode #1</title>
+    <link rel="stylesheet" href="../style/style.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
+  </head>
+  <body>
+    <header>
+      <h3>Leetcode #1</h3>
+      <p class="byline">In my (unfinished) post-baccalaureate CS program I took a class on algorithms. At the time I was working a full time job, was a part time student, and caring for a family member with a broken collarbone. All of this was, perhaps, not a suitable environment for retaining the information I have learned. Join me on my journeys through leetcode, hacker rank, Cracking the Coding Interview, and Grokking Modern System Design as I try to retain some of this information in a more relaxed environment.</p>
+      <hr>
+    </header>
+    <div class="longform-body">
+      <p>This problem comes from Leetcode but I found the Leetcode link as the "easiest" in Neetcode's section on Arrays and hashing. You can find it on Leetcode <a href="https://leetcode.com/problems/two-sum/">here.</a> Here's the prompt:</p>
+      <div class="coding-prompt inner-piece">
+        <p>Given an integer array nums, return true if any value appears at least twice in the array, and return false if every element is distinct.</p>
+      </div>
+      <p>So, I had done this one before. I didn't look at the solution in the editor this time around and just deleted and redid it. This is what I came up with:</p>
+      <pre>
+        <code class="language-python inner-piece">
+          class Solution:
+              def twoSum(self, nums: List[int], target: int) -> List[int]:
+                  hashnums = {}
+                  for ind, n in enumerate(nums):
+                      diff = target - n
+                      if diff in hashnums:
+                          return [ind, hashnums[diff]]
+                      hashnums[n] = ind
+                  return False
+        </code>
+      </pre>
+      <p>I think this is the standard solution you'll find by googling this problem online. Fairly standard and straightforward list problem. I'll go ahead and say, it's O(n) time complexity and O(n) space complexity, for hashnums.</p>
+      <p>I want to drag myself online though. Leetcode lets you look through your historical submissions. This is what I found when I did that:</p>
+      <pre>
+        <code class="language-python inner-piece">
+            class Solution:
+                def twoSum(self, nums: List[int], target: int) -> List[int]:
+                    hashnums = {ind: n for ind, n in enumerate(nums)}
+                    for i in range(len(nums)):
+                        r = target - nums[i]
+                        #print(i)
+                       # print(r)
+                        #print(target)
+                        #print(nums[i])
+                        if r in hashnums.values():
+                            indices = list(filter(lambda item: item[1] == r and item[0] != i, hashnums.items()))
+                            #print(indices)
+                            if indices:
+                                return [i, indices[0][0]]
+        </code>
+      </pre>
+      <p>Complete with commented out print statements and all. I guess I want to draw attention to it because, for a while, when I was trying to solve these problems, I would try to sort of solve them ex nihilo, all by myself, without consulting anyone else's ideas or anyone else's solutions. When I couldn't solve them, or had slow solutions, I would get frustrated and feel like I wasn't any good at these types of problems and maybe shouldn't be an engineer.</p>
+      <p>Life doesn't work that way 99% of the time. No one can think critically and problem solve without first being given the tools to do that. I wish I hadn't spent so much time beating myself up and having a crisis of confidence about things that <i>I can learn</i> and instead simply allowed myself the patience and grace to learn them. There's plenty of things that want to make me feel bad about myself (for example, sleep deprivation, three ice cream scoops at once, and dynamic programming) but humans can be better. We can learn and collaborate. After all, when you're working as an engineer, wouldn't you expect someone to collaborate and problem-solve with you?</p>
+      <p>Be gentle.</p>
+      <script src="index.js"></script>
+      <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+  </body>
+</html>
