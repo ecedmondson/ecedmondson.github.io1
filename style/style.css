@@ -16,6 +16,11 @@ body {
     margin: 0px;
 }
 /*Classes*/
+.avatar img {
+    max-width: 175px;
+    border-radius: 50%;
+}
+
  .byline {
      font-style: italic;
 }
@@ -52,14 +57,31 @@ body {
      justify-content: center;
      align-items: center;
 }
+.masthead {
+	padding: .2em;
+	margin-left: .25em;
+	margin-top: .5em;
+	margin-bottom: .5em;
+}
+.masthead:after {
+    content: "";
+    display: block;
+    margin: 0 auto;
+    width: 70%;
+    padding-top: 20px;
+    border-bottom: 1px solid gray; /* This creates the border. Replace black with whatever color you want. */
+}
 .main-layout {
      display: flex;
      flex-direction: row;
      flex-wrap:  nowrap;
      margin-top: .25em;
-     margin-left: .25em;
 	min-width: 100%;
     min-height: 100%;
+}
+.main-body {
+	flex-basis: auto;
+	min-width: 75%;
 }
 .side-nav {
      padding: .5 em;
@@ -67,6 +89,7 @@ body {
      display: flex;
      flex-direction: column;
      background-color: #C1A29B;
+     flex-basis: auto;
 }
 .nav-header {
   text-decoration: underline;
