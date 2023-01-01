@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Leetcode #242</title>
+    <link rel="stylesheet" href="../style/style.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
+  </head>
+  <body>
+    <header>
+      <h3>Leetcode #242</h3>
+      <p class="byline">In my (unfinished) post-baccalaureate CS program I took a class on algorithms. At the time I was working a full time job, was a part time student, and caring for a family member with a broken collarbone. All of this was, perhaps, not a suitable environment for retaining the information I have learned. Join me on my journeys through leetcode, hacker rank, Cracking the Coding Interview, and Grokking Modern System Design as I try to retain some of this information in a more relaxed environment.</p>
+      <hr>
+    </header>
+    <div class="longform-body">
+      <p>This problem comes from Leetcode but I found the Leetcode link as the second easiest in Neetcode's section on Arrays and hashing. You can find it on Leetcode <a href="https://leetcode.com/problems/valid-anagram">here.</a> Here's the prompt:</p>
+      <div class="coding-prompt inner-piece">
+        <p>Given two strings s and t, return true if t is an anagram of s, and false otherwise.
+
+An Anagram is a word or phrase formed by rearranging the letters of a different word or phrase, typically using all the original letters exactly once.
+
+</p>
+      </div>
+      <p>I honestly found the solution to this in less than five minutes, so I guess <i>easy</i> is right. I have two solutions as well. Let's take a look at both of them:.</p>
+      <pre>
+        <code class="language-python inner-piece">
+            class FirstSolution:
+                def isAnagram(self, s: str, t: str) -> bool:
+                    if len(s) != len(t):
+                        return False
+                    smap = {}
+                    for l in s:
+                        if l in smap:
+                            smap[l] += 1
+                        else:
+                            smap[l] = 1
+                    for l in t:
+                        if l not in smap:
+                            return False
+                        if smap[l] == 0:
+                            return False
+                        smap[l] -= 1
+                    for v in smap.values():
+                        if v != 0:
+                            return False
+                    return True
+
+            class SecondSolution:
+                def isAnagram(self, s: str, t: str) -> bool:
+                    if len(s) != len(t):
+                        return False
+                    
+                    # same at this point
+                    lengths = len(s)
+                    smap, tmap = {}, {}
+                    for i in range(lengths):
+                        smap[s[i]] = 1 + smap.get(s[i], 0)
+                        tmap[t[i]] = 1 + tmap.get(t[i], 0)
+                    return smap == tmap
+        </code>
+      </pre>
+      <p>So these are both O(n). I "created" the second attempt because I didn't like how many loops I had in the first solution. Basically, even though sequential, non-nested loops don't change the runtime time complexity because that measures how the runtime increases as input grows, constant time is something you have to worry about as well and I didn't like having three loops. For the second solution, I decided to exploit the fact that, if the lengths aren't the same, we are returning False anyway and simply iterate through at O(n) time complexity <i>once</i> and do constant time operations for both strings during the one iteration.</p>
+      <p>Hilariously, Leetcode told me that the second solution was actually <i>slower</i> than the first solution. The runtime for the first solution was 48 ms and the runtime for the second was 59. I am not sure why at this point in the writing, but I suspect two places of the code might have something to do with it:</p>
+      <ul>
+        <li>-the "early" returns in the second for loop (the loop iterating through t) for the first solution actually give it a faster constant time runtime even though both solutions are O(n)</li>
+        <li>-maybe comparing equality on dictionaries is more expensive than I thought?</li>
+      </ul>
+      <p> It will be pretty easy to test the first theory. We can just create a boolean flag <i>is_not_anagram</i> and have it set to False whenever those "early" return values are happening and then return at the end and compare runtime. I am going to do that like this:</p>
+      <pre>
+        <code class="language-python inner-piece">
+          class FirstSolution:
+              def isAnagram(self, s: str, t: str) -> bool:
+                  if len(s) != len(t):
+                      return False
+                  smap = {}
+                  for l in s:
+                      if l in smap:
+                          smap[l] += 1
+                      else:
+                          smap[l] = 1
+                  for l in t:
+                      if l not in smap:
+                          return False
+                      if smap[l] == 0:
+                          return False
+                      smap[l] -= 1
+                  for v in smap.values():
+                      if v != 0:
+                          return False
+                  return True
+
+          class Solution:
+              def isAnagram(self, s: str, t: str) -> bool:
+                  if len(s) != len(t):
+                      return False
+                  smap = {}
+                  # assume it is until given other info
+                  is_anagram = True
+                  for l in s:
+                      if l in smap:
+                          smap[l] += 1
+                      else:
+                          smap[l] = 1
+                 for l in t:
+                    if l not in smap:
+                        is_anagram = False
+                    elif smap[l] == 0:
+                        is_anagram = False
+                    else:
+                      smap[l] -= 1
+                  for v in smap.values():
+                      if v != 0:
+                          is_anagram = False
+                  return is_anagram
+
+          class SecondSolution:
+              def isAnagram(self, s: str, t: str) -> bool:
+                  if len(s) != len(t):
+                      return False
+                  
+                  # same at this point
+                  lengths = len(s)
+                  smap, tmap = {}, {}
+                  for i in range(lengths):
+                      smap[s[i]] = 1 + smap.get(s[i], 0)
+                      tmap[t[i]] = 1 + tmap.get(t[i], 0)
+                  return smap == tmap
+        </code>
+      </pre>
+      <p>This late return gave me a runtime of 59 ms which is exactly what I got with the second. So I think theory number 1 is correct. Cool to test!</p>
+      <p>This was super easy. Wish I could get something like this on an interview!</p>
+      <script src="index.js"></script>
+      <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+  </body>
+</html>

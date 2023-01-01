@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Leetcode #217</title>
+    <link rel="stylesheet" href="../style/style.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
+  </head>
+  <body>
+    <header>
+      <h3>Leetcode #217</h3>
+      <p class="byline">In my (unfinished) post-baccalaureate CS program I took a class on algorithms. At the time I was working a full time job, was a part time student, and caring for a family member with a broken collarbone. All of this was, perhaps, not a suitable environment for retaining the information I have learned. Join me on my journeys through leetcode, hacker rank, Cracking the Coding Interview, and Grokking Modern System Design as I try to retain some of this information in a more relaxed environment.</p>
+      <hr>
+    </header>
+    <div class="longform-body">
+      <p>This problem comes from Leetcode but I found the Leetcode link as the "easiest" in Neetcode's section on Arrays and hashing. You can find it on Leetcode <a href="https://leetcode.com/problems/contains-duplicate/">here.</a> Here's the prompt:</p>
+      <div class="coding-prompt inner-piece">
+        <p>Given an integer array nums, return true if any value appears at least twice in the array, and return false if every element is distinct.</p>
+      </div>
+      <p>I honestly found the solution to this in less than five minutes, so I guess <i>easy</i> is right. Additionally, since I'm doing these in python, there's a python way. Let's take a look at both solutions:.</p>
+      <pre>
+        <code class="language-python inner-piece">
+          class SolutionPythonic:
+              def containsDuplicate(self, nums: List[int]) -> bool:
+                  # Pythonic way
+                  return not len(nums) == len(set(nums))
+
+          class SolutionHashing:
+              def containsDuplicate(self, nums):
+                  # hashing way
+                  values = {}
+                  for n in nums:
+                      if n in values:
+                          return True
+                      values[n] = True
+                  return False
+        </code>
+      </pre>
+      <p>So these are both O(n), actually and had pretty similar runtimes on Leetcode. The Pythonic solution basically returns whether or not the number of elements in the list (non-unique values) nums is equal to the number of elements in the set (unique values) typecast from nums. The logic here is basically that, if a value is present more than once then the value returned from calling <i>len()</i> will be different. The prompt asks us to find whether the input has at least one value that is repeated, so we return <i>not</i> of this equality operation. You could also call <i>len(nums) != len(set(nums))</i>. Fun fact I learned writing this paragraph: python stores number of elements so len calls are O(1). Nice.</p>
+      <p>The hashing solution, which might be a way to do something similar in say, C++ by importing std:map, is also O(n). It iterates at least once through all numbers n in nums and if that number n is already a key in values, then the function returns True. Otherwise, it hashes that number n and continues iterating. If iteration expires, then there are no duplicates and we return False.</p>
+      <p>This was super easy. Wish I could get something like this on an interview!</p>
+      <script src="index.js"></script>
+      <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+  </body>
+</html>
