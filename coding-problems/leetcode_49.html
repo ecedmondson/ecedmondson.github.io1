@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Leetcode #49</title>
+    <link rel="stylesheet" href="../style/style.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
+  </head>
+  <body>
+    <header>
+      <h3>Leetcode #49</h3>
+      <p class="byline">In my (unfinished) post-baccalaureate CS program I took a class on algorithms. At the time I was working a full time job, was a part time student, and caring for a family member with a broken collarbone. All of this was, perhaps, not a suitable environment for retaining the information I have learned. Join me on my journeys through leetcode, hacker rank, Cracking the Coding Interview, and Grokking Modern System Design as I try to retain some of this information in a more relaxed environment.</p>
+      <hr>
+    </header>
+    <div class="longform-body">
+      <p>This problem comes from Leetcode but I found the Leetcode link as the first among the "medium" problems in Neetcode's section on Arrays and hashing. You can find it on Leetcode <a href="https://leetcode.com/problems/group-anagrams/">here.</a> Here's the prompt:</p>
+      <div class="coding-prompt inner-piece">
+        <p>Given an array of strings strs, group the anagrams together. You can return the answer in any order.
+
+An Anagram is a word or phrase formed by rearranging the letters of a different word or phrase, typically using all the original letters exactly once.</p>
+      </div>
+      <p>Originally reading this problem made me think of <a href="coding-problems/leetcode_242.htm.">Leetcodde #242</a> so I pulled up the problem to that one briefly. However, after comparing the two problem prompts, I realized that they were different enough that there probably wouldn't be much re-use. Leetcode 242 basically asks you to determine if two string inputs are anagrams, a <i>yes or no question</i> whereas this one asks you to group anagrams, thereby determining what the anagrams are, which I suppose does include part of 242, and then organizing your determinations. However, the way I determined anagrams in 242 used a dictionary and dictionaries are unhashable (i.e. can't be keys in further dictionaries). This is a theme that will keep showing up for me by the way, so I call it out now.</p>
+      <p>When it comes to actually solving this problem, I figured out the majority of the idea myself: mainly you'll need to hash something unique to the particular letterset, probably as a key of some sort, then have that key point to some sort of collection of the anagrams. This is my first solution I came up with and it was mostly correct, also incorrect. See if you can figure out what's wrong with it:</p>
+      <pre>
+        <code class="language-python inner-piece">
+          class Solution:
+              def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
+                  if not strs:
+                      return []
+                  index = 0
+                  groups = []
+                  groupshash = {}
+                  for w in strs:
+                      key = sum([ord(x) for x in w])
+                      if key in groupshash:
+                          groups[groupshash[key]].append(w)
+                      else:
+                          groupshash[key] = index
+                          index += 1
+                          groups.append([])
+                          groups[groupshash[key]].append(w)
+                  return groups
+        </code>
+      </pre>
+      <p>So the issue is setting the key. Remember how I said unhashable types would be a common problem here? Well, it still is: I knew that a list of <i>[ord(x) for x in w]</i> would be unhashable (not to mention lists are ordered, so the ordering would render comparisons across valid anagrams useless) so I decided to sum the values. Unfortunately, sums aren't unique enough a key. My solution failed on an input that contained both "duh" and "ill", which are obviously not anagrams, but which sum to the same char numeric value and were grouped incorrectly in my solution return value.</p>
+      <p>So that led me to this solution, which is similar:</p>
+      <pre>
+        <code class="language-python inner-piece">
+          class Solution:
+              def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
+                  if not strs:
+                      return []
+                  index = 0
+                  groups = []
+                  groupshash = {}
+                  for w in strs:
+                      key = [0] * 26
+                      for c in w:
+                          key[ord(c) - ord("a")] += 1
+                      key = tuple(key)
+                      if key in groupshash:
+                          groups[groupshash[key]].append(w)
+                      else:
+                          groupshash[key] = index
+                          index += 1
+                          groups.append([])
+                          groups[groupshash[key]].append(w)
+                  return groups
+        
+        </code>
+      </pre>
+      <p>I had two problems to solve with my key: hashing and ordering. If I couldn't use the sum, ordering became a much bigger problem. I ended up solving hashing and ordering the same way: by using a typecast tuple, which also requires me to place the character <i>ord</i> evaluation at the index appropriate to that character (which we get by subtracting the ord of "a" or the base as you might think of it). Tuples are hashable and the order comes from the list.</p>
+      <p>You'r probably thinking....hey! I think I see some other improvements to be made here. Yes, that's correct. Once I abandoned my sum approach I did notice some other things I could do better. This was my final answer:</p>
+      <pre>
+        <code class="language-python inner-piece">
+          class Solution:
+              def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
+                  if not strs:
+                      return []
+                  groupshash = {}
+                  for w in strs:
+                      key = [0] * 26
+                      for c in w:
+                          key[ord(c) - ord("a")] += 1
+                      key = tuple(key)
+                      if key in groupshash:
+                          groupshash[key].append(w)
+                      else:
+                          groupshash[key] = [w]
+                  return [v for v in groupshash.values()]
+        
+        </code>
+      </pre>
+      <p>So time complexity for this solution is O(m * n) where n is the length of strs and m is the average-case length of words in strs. This is because of the nested for loop.</p>
+      <p>I'm going to be honest, I'm not the biggest fan of this solution. I'm not sure why. If anyone has any other ideas I would be open to them!</p>
+      <script src="index.js"></script>
+      <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+  </body>
+</html>
