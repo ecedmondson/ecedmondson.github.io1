@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Python Brain Teasers #1</title>
+    <link rel="stylesheet" href="../style/style.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
+  </head>
+  <body>
+    <header>
+      <h3>Python Brain Teasers #1</h3>
+      <p class="byline">My engineering team at work has a sprint retro each sprint where one of the agenda items is any valuable learnings. Because it was up to team members to both retain and prepare a small learning from the past sprint, it frequently went skipped. I decided to start doing brainteasers with my team related to topics that might be relevant to our work or stack.</p>
+      <hr>
+    </header>
+    <div class="longform-body">
+      <p>I wrote this brainteaser based on a feature of Python that has burned me more times than I am comfortable admitting.</a> Here's the code. The prompt is to predict the output:</p>
+      <pre>
+        <code class="language-python inner-piece">
+        def print_conditionally(val):
+                print(val)
+                if not isinstance(val, int):
+                    print("you cheated! i only want integers.")
+                if val < 7:
+                    print("this seems like a healthy number of donuts")
+                if val >= 7:
+                    print("this is probably too many donuts")
+
+        my_funcs = []
+
+        for i in range(-2, 15, 3):
+            my_funcs.append(lambda: print_conditionally(i))
+
+        for func in my_funcs:
+            func()
+        </code>
+      </pre>
+      <p>So what will the output of this code be?</p>
+      <script src="index.js"></script>
+      <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+  </body>
+</html>
