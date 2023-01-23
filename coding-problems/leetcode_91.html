@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Leetcode #91</title>
+    <link rel="stylesheet" href="../style/style.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
+  </head>
+  <body>
+    <header>
+      <h3>Leetcode #91</h3>
+      <p class="byline">In my (unfinished) post-baccalaureate CS program I took a class on algorithms. At the time I was working a full time job, was a part time student, and caring for a family member with a broken collarbone. All of this was, perhaps, not a suitable environment for retaining the information I have learned. Join me on my journeys through leetcode, hacker rank, Cracking the Coding Interview, and Grokking Modern System Design as I try to retain some of this information in a more relaxed environment.</p>
+      <hr>
+    </header>
+    <div class="longform-body">
+      <p>This problem comes from Leetcode and I find it absolutely loathsome. It may very well be my least favorite problem I've done so far. I will explain why I find it so loathsome at the end, but in the meantime, let's explain the problem, and how to make it work with Leetcode's evaluator. If you're follwoing along, you can find it on Leetcode <a href="https://leetcode.com/problems/decode-ways/">here.</a> Here's the prompt:</p>
+      <div class="coding-prompt inner-piece">
+        <p>A message containing letters from A-Z can be encoded into numbers using the following mapping:</p>
+
+        <div><p>'A' -> "1"
+        'B' -> "2"
+        ...
+        'Z' -> "26"</p></div>
+        <p>To decode an encoded message, all the digits must be grouped then mapped back into letters using the reverse of the mapping above (there may be multiple ways). For example, "11106" can be mapped into:
+
+        "AAJF" with the grouping (1 1 10 6)
+        "KJF" with the grouping (11 10 6)
+        Note that the grouping (1 11 06) is invalid because "06" cannot be mapped into 'F' since "6" is different from "06".
+
+        Given a string s containing only digits, return the number of ways to decode it.
+
+        The test cases are generated so that the answer fits in a 32-bit integer.</p>
+      </div>
+      <p>I don't think this problem is that hard to understand, luckily. You essentially want to go through a string of numbers and map the possible options. So at the most easy you have 1 option, like with the string "1", or you might have the next most easy, with 2 options, like with the string "12". For each number, you need to figure out if it is valid on it's own, if it is valid as a ones digit, and if it is valid as a tens digit. This is why things like "12" have two ways of decoding ("12" -> "AB" or "L") and things like "32" only have one ways of decoding ("32" -> "CB"). So, as is common with computer science, as the input size increases things get slightly more complicated. In this case, things get slightly more complicated to compute and to compute efficiently.</p>
+      <p>Either way, this problem is basically what I stated in that previous paragraph: for each number you need to make a decision of whether to pop off and evaluate only 1 digit, pop off and evalute 2 digits, or evaluate both of those cases. If that doesn't make sense, consider the slightly longer input of "123". Sure, that's not that much longer than my previous examples, but you still have <i>one more decision to make</i>. You need to decide do you evalute the value <b>3</b> as the ones digits of <b>23</b> or all by itself as just <b>3</b>. Do you evaluate it as both? How do you know what to do?</p>
+      <p>Enter the tree.</p>
+      <p>My first approach to solving this problem, which isn't <i>technically wrong</i>, I'll point out, is to imagine this a tree of stack calls. Consider the MUCH large input of <b>1234105</b>. There are multiple places here where you can decide to consider a digit all by itself or as part of a two-digit number. The tree is helpful here to visualize our decisions:</p>
+      <div class="inner-piece">
+      <img class="code" src="../static/leetcode_91_1.png" alt="Leetcode 91 First Tree">
+      </div>
+      <p>Forgive my MacOS version of Paint usage here. I'm too lazy to figure out something better. That being said, this tree shows basically, what decisions you need to make at each point, including when, according to the rules of the mapping, you might not decide to evaluate two different options (for example, according to the rules of the mapping "34" isn't valid).</p>
+      <p>Additionally, this tree, with the terminal branches, show us the answer, if you count those branches: the answer is 3! There are 3 valid ways to decode this input. Nice! trees work.</p>
+      <p>So that means this code is valid as a solution:</p>
+      <pre>
+        <code class="language-python inner-piece">
+          valid_letters_as_numbers = [str(x) for x in range(1, 27)]
+          def is_valid(s):
+              return s in valid_letters_as_numbers
+
+          def subcandidates(s):
+              if is_valid(s[0]):
+                  yield s[1:]
+              if len(s) > 1 and is_valid(s[0:2]):
+                  yield s[2:]
+
+          def evaluate(candidate):
+              if not candidate:
+                  return 1
+              subs = subcandidates(candidate)
+              return sum(evaluate(v) for v in subs)
+
+
+          class Solution:
+              def numDecodings(self, s: str) -> int:
+                  if not s:
+                      return 0
+                  return evaluate(s)
+        </code>
+      </pre>
+      <p>So essentially, this code does what the tree does. The function <b>def subcandidates(s)</b>is what allows you to decide whether to continue down one path or two. The function <b>evaluate(candidate)</b> evaluates a particular candidate, or node, in the tree example, along the tree, and then finds the branches - or decisions - to be made, based on that particular candidate. The <b>evaluate</b> function returns 1 if there is no candidate as a result of an implementation detail; if you consider the tree for the input "1123" you might have nodes with an empty string at the terminus of the tree, but the implementation detail here is that an empty string will be returned from the <b>subcandidates</b> function as a sign of success. Basically, one step removed. So you pass those back up as successes.</p>
+      <p>So....you can probably notice the cursor in your browser. This post is much longer than this particular post. What's wrong here? Well, Leetcode rejects this solution with a time limit exceeded error. Why? The answer is in the tree itself.</p>
+      <p>If you look at the tree again, you will see that there is a lot of computation that is repeated. Consider for example, these two images that show a color-coded verion of the various repeated computations and the call stack (since the above code is recurisve)</p>
+      <p>First the repetitions:</p>
+      <img class="code" src="../static/leetcode_91_2.png" alt="Leetcode 91 Repetitions">
+      <p>And then the call stack:</p>
+      <img class="code" src="../static/leetcode_91_25.png" alt="Leetcode 91 Call Stack">
+      <p>The call stack order is, again, another implementation detail of that for loop in the sum. Essentially, in the <i>worst</i> case scenario (time complexity wise), where there are two decisions to be made, then the implemntation considers the branch of the tree first where there is only one digit considered. This is just an order thing, a part of the implementation detail. But, it also means that by the time, in the above example anyway, call stack 7 is executing, that call stack 4, which has the exact same parameters (or candidate, if that's easier to understand), <b>4105</b>, has already been computed. In the code example above, we have to re-computer <b>4105</b> at call stack 7. This is, according to Leetcode anyway, a waste of time. And that's why it times out.</p>
+      <p>So, how do we speed this up? I hate to tell you, but the answer is dynamic programming.</p>
+      <p>Dynamic programming is essentially a programming approach where you calculate a problem either building up towards the solution (bottom-up) or from an ideal solution dowon (top-down). That, to me anyway, doesn't usually make a lot of sense. For the reader's sake, we're going to dynamic program this bottom-up because we are going to turn that tree into an array that stores the decisions we make for each digit, or each index, in the string of digits.</p>
+      <p>I TOLD YOU that this problem is loathsome.</p>
+      <p>So where do we get started here? Basically, the first thing to understand here is that each time your tree branches in a valid way, you have made a valid decision. Valid decisions are good, they increment the number of ways something can be decoded (valididly, I might add, as it is a valid decision). What does this mean?</p>
+      <p>Lets go back to our tree example above, with the very first branch, or decision. The input is <b>1234105</b> and you first have to make the decision: <i>can I decode this where 1 is a valid decode or 12 is a valid decode or both are valid decodes?</i> The last option is what you can do here which means that, at that point, knowing nothing else about the rest of the indices in the input, you know you have two <i>potential valid</i> answers. What I mean by this is that you don't know what the next index is, and don't need to, because, at this point, you know you have two paths to consider.</p>
+      <p>In the dynamic programming way, that's what we're going to code. This seems, well, easy enough. But, there's a few cases where you <i>don't</i>, for whatever reason, have two branches. Consider, for example, the input we've already seen, in these green brackets:</p>
+      <img class="code" src="../static/leetcode_91_3.png" alt="Leetcode 91 Edge Cases">
+      <p>So in "1" and "12" and "123" we have digits that, when considered as a state by themselves, and when considered as a state as part of a two digit number, are valid in both ways. As soon as we get to the "1234", though (first, or highest, green bracket), we have input that no longer makes two decisions, or, a reduction in trees. As we pointed out earlier, the branches represent potential valid solutions and, as we pointed out at the very beginning, the total valid branches in the tree are the solution. So, when we don't branch, that's actually very important because it means we <i>don't</i> want to increment our answer, because we no longer have a valid branch to consider as part of the decoding solution.</p>
+      <p>As a note, in the illustrations below, I have notation that has N sub i to indicate N(index). However, I am not using zero-index indices in the notation. I apologize. We will start relatively quickly.</p>
+      <p>So our first index, or our base case, is always going to be the easiest to calculate. Is it valid? If yes, then it's valid (if not, just go ahead and return 0):</p>
+      <img class="code" src="../static/leetcode_91_4.png" alt="Leetcode 91 Iterating 1">
+      <p>Our second index is going to be the second easier to calculate, and it's bascially as easy as the first, or zero-eth index. If it is valid, then add 1 to whatever the previous index was. At this point, we should probably reference how what is going on in this notation relates to the tree, as it begins to become important. In this example, the "ways" of calculation evaluated to 2...which means that, at this index, there were indeed <i>two</i> ways to get here. We know that...because we can think about it. This 2, at this point, represents the two potential valid trees we have:</p>
+      <img class="code" src="../static/leetcode_91_5.png" alt="Leetcode 91 Iterating 2">
+      <p>At this index, things become a bit more difficult, bit still okay in our current input. This roughly corresponds to call stack 3 in the tree. It is valid by itself, but, and what's confusing about the dynamic programming solution, it's not valid as a tens digit. We don't know that yet though, because we're iterating from lower index to larger index, so at this point we only know that it's <i>valid by itself and valid as a ones digit</i>. We don't yet know in the dynamic programming solution that we need to "winnow" the branches.</p>
+      <p>As this image contains multiple solutions, let's consider why they are grouped. In this image, we show how the dynamic programming solution is different from the code provided above. At the point where <b>4</b> is encountered in the code provided above we would be calculating subcandidates and deciding how many subcandidates we have. The <b>subcandidates(...)</b> function would return only one subcandidate, thereby winnowing the tree, at this point. But for the dynamic programming solution, we don't know that the 3 is an invalid tens digit until considering it's potential ones digit.</p>
+      <p>The above aside helps us understand the calculation for the next index, index 3 (in zero-indices), index 4 in my screenshots, and value 4 in the string. This index is the fist at which it does not work as a two-digit path for this particular input. What this means is that we need to decrement our total options. Indeed, the next index, pictured below with the above calculations, does this too, but we have already noticed this pattern. Again, compare the calculations happening for the values on the right, to the tree on the left. The subtraction is occurring because there aren't two valid options:</p>
+      <img class="code" src="../static/leetcode_91_6.png" alt="Leetcode 91 Iterating 3">
+      <p>Now we get to the "0". Great...it is the other green bracketed branch. It seems confusing, but it actually shares a lot in common with the examples above: basically, because the <b>0</b> means that we don't keep branching, i.e. we don't decide to consider two potentials, we don't increment the total number of ways:</p>
+      <img class="code" src="../static/leetcode_91_7.png" alt="Leetcode 91 Iterating 4">
+      <p>Finally, we consider the end. Because of the zero in the previous index it doesn't work as a two digit valid decode, meaning we only have the one branch that we've already been keeping track of:</p>
+      <img class="code" src="../static/leetcode_91_8.png" alt="Leetcode 91 Iterating 5">
+      <p>I tried to show the pattern here. Basically:</p>
+      <p>
+        <ol>
+          <li>As a general rule, we keep track of <i>potential valid branches</i></li>
+          <li>We increment ways, which is the same thing as <i>potential valid branches</i> whenever we find a new potential branching with two options</li>
+          <li>Whenever we find a branching where there is only one option, we don't increment. There are two reasons why we might not increment: a) because a value isn't valid by itself as a ones digit (for example "0") or b) because a value, when in the ones digit position, doesn't make a valid decoding for a two-digit candidate.</li>
+        </ol>
+      </p>
+      <p>That last bullet point is actually pretty important to understand for the dynamic programming solution (i'll show you a trick later on for why). Basically, at the beginning here, we were iterating through the tree making decisions based on whether the first two digits were valid. So, for example, in "1234105" we make a branch to "234105" and "34105" because we are considering index and index + 1 (or "1" and "12"), but in the dynamic programming solution we are considering index and index - 1 (or "2" and "12"). This means that we have to maintain our ways based on <i>past decisions</i>. This is a super annoying - and common - part of dynamic programming.</p>
+      <p>So...based on the rules we outlined above, you might think something like this might work to code up the solution...and you would be close:</p>
+      <pre>
+        <code class="language-python inner-piece">
+          class Solution(object):
+             def numDecodings(self, s):
+                if s[0] == "0":
+                    return 0
+                n = len(s)
+                dp = [0 for i in range(n)]
+                # because we already returned
+                dp[0] = 1
+                for i in range(1,n):
+                   alone = s[i]
+                   together = s[i-1:i+1]
+                   dp[i] += dp[i -1]
+                   if alone != "0":
+                      dp[i]+= 1
+                   else:
+                      dp[i] = dp[i - 2]
+                   if together[0] not in ("1", "2"):
+                      dp[i] -= 1
+                   if together[0] == "2" and together[1] in ("7", "8", "9"):
+                      dp[i] -= 1
+                return dp[-1]
+        </code>
+      </pre>
+      <p>This is extremely close...but this solution consider the edge cases <i>so much</i> that it fails to consider the happy path. In addition, it's not very "optimized" when it comes to code readability and number of operations. Put another way, the code above is wrong for some cases and it can be improved in the cyclomatic complexity to reduce if statements.</p>
+      <p>So why does it fail happy paths? Consider the input <b>1123</b>. Here's an image of a tree that might help:</p>
+      <img class="code" src="../static/leetcode_91_9.png" alt="Leetcode 91 Happy Path">
+      <p>So there's something weird happening in these branches, right? I'm including an "empty string" at the end of the branch. Remember how I said earlier that the <b>if not candidate...</b> code in the first code solution was an implementation detail? Indeed, this is because it WAS an implementation detail...one that would account for the cases where the branch ends so happily that both the ultimate index and penultimate index are valid. However, the second code example, the one based on dynamic programming, actually <i>doesn't take this into consideration</i>. So...what do we do?</p>
+      <p>Basically, we need to reconsider how we evaluate the state of the digits. I went out of the way to emphasize that a digit has two states: first by itself and also as part of a pair. In the tree solution we move rightward, in the reading way, to make decisions based on the first two digits of the string. But, as I pointed out earlier, in the dynamic programming solution, we consider a digit <i>and we consider the previous state.</i>. So that is what is wrong with that second code above.</p>
+      <p>So, what we want, basically, is the bullet point list of rules above, but put into a way that will also consider the happy paths:</p>
+      <p>
+        <ol>
+          <li>WE STILL want to keep track of <i>potential valid branches</i></li>
+          <li>However, we need to consider state, and in the dynamic programming solution, state means, "this value" and "this value paired with the previous value".</li>
+          <li>If you think about the previous value, it <i>also</i> has two states, and those state are, well, the same as the value under consideration: the previous value's value, and the previous value paired with the previous value's previous value</li>
+        </ol>
+      </p>
+      <p>That's confusing. So basically, we can consider each value, with the exception of the edge cases, to be the sum of it's states and the previous value's states. This means that for each value, we just need to calculate a bunch of states and keep summing them. So the code ends up looking like this:</p>
+      <pre>
+        <code class="language-python inner-piece">
+          valid_letters = [str(x) for x in range(1, 27)]
+
+          def is_valid(s):
+              return s in valid_letters
+
+          class Solution(object):
+             def numDecodings(self, s):
+                if s[0] == "0":
+                    return 0
+                dp = [0 for i in range(len(s))]
+                # this is safe because we already returned
+                # above so we know it is valid by itself
+                dp[0] = 1
+                if len(s) == 1:
+                    return dp[0]
+                # we go ahead and calcualte this because we
+                # know that each index is the sum of it's states
+                # plus the previous states
+                print(s[:2])
+                if is_valid(s[:2]):
+                    if s[1] != "0":
+                      dp[1] = dp[0] + 1
+                    else:
+                      dp[1] = dp[0]
+                elif s[0] == "2":
+                    dp[1] = dp[0]
+                elif is_valid(s[1]):
+                    dp[1] = dp[0]
+                else:
+                    return 0
+                for i in range(2,len(s)):
+                   alone = s[i]
+                   together = s[i-1:i+1]
+                   if alone != "0":
+                      dp[i]+=dp[i-1]
+                   if is_valid(together):
+                      dp[i]+=dp[i-2]
+                print(dp)
+                return dp[-1]
+        </code>
+      </pre>
+      <p>Annoyingly, this is O(n), because it iterates through things exactly once. What is happening is this code is bascially this:</p>
+      <p>
+        <ol>
+          <li>Return if index 0 is invalid</li>
+          <li>Calculate if index 1 is valid by itself or as a pair with index 0</li>
+          <li>Calculate the remaining indices. This means that if it is valid by itself, maintain previous state, and if it is valid as a pair, add the previous previous state</li>
+        </ol>
+      </p>
+      <p>This might be confusing, but, if so, look at the repeated work in the tree. That's basically what's going on with the two states. The if statements basically help you decide whether to preserve state, or, in the tree example, whether to branch or not.</p>
+      <p>So...as promised...why do I hate this problem? Well, a lot of reasons. First of all, it has just enough edge cases to be annoying as a dynamic programming problem, which, as a category, are problems that are already annoying enough. Additionally, well, take a look at the three pieces of code in this problem. Which one is the most readable? I would argue, and think you agree, that it's the first one. That is the code that is easiest to understand. Don't get me wrong, I don't think it's <i>easy</i> code. I'm not arguing for dumbing down code. In order to understand the first code you need to understand trees, and the call stack, and recursion. There's a lot there. But it's readable, each function and each line plays a purpose.</p>
+      <p>The dynamic programming solution? Well, not so much. I understand it has it's purpose, mostly in optimizing, but...where am I going to use this? Which interviewer is giving me t his challenge? Am I interviewing for a position that writes gateway network caches? if so, I'm not interested. I'm here to implement RESTful patterns, and, if you're asking this in a full stack interview, you should probably ask yourself why you are gatekeeping.</p>
+      <script src="index.js"></script>
+      <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+  </body>
+</html>

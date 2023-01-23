@@ -21,6 +21,11 @@ body {
     border-radius: 50%;
 }
 
+.code img {
+    max-width: 250px;
+    border-radius: 50%;
+}
+
  .byline {
      font-style: italic;
 }
