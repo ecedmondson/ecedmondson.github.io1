@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Leetcode #875</title>
+    <link rel="stylesheet" href="../style/style.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
+  </head>
+  <body>
+    <header>
+      <h3>Leetcode #875</h3>
+      <p class="byline">In my (unfinished) post-baccalaureate CS program I took a class on algorithms. At the time I was working a full time job, was a part time student, and caring for a family member with a broken collarbone. All of this was, perhaps, not a suitable environment for retaining the information I have learned. Join me on my journeys through leetcode, hacker rank, Cracking the Coding Interview, and Grokking Modern System Design as I try to retain some of this information in a more relaxed environment.</p>
+      <hr>
+    </header>
+    <div class="longform-body">
+      <p>This problem...is binary search. BUT INSTEAD OF BEING GOOD BINARY SEARCH, IT IS HORRIBLE BINARY SEARCH. That's it. That's the problem. Binary search. That's all it is. BUT HORRIBLE. If you want to reach the problem yourself you can find it <a href="https://leetcode.com/problems/koko-eating-bananas/">here.</a> Here's the prompt:</p>
+      <div class="coding-prompt inner-piece">
+        <p>Koko loves to eat bananas. There are n piles of bananas, the ith pile has piles[i] bananas. The guards have gone and will come back in h hours.
+
+Koko can decide her bananas-per-hour eating speed of k. Each hour, she chooses some pile of bananas and eats k bananas from that pile. If the pile has less than k bananas, she eats all of them instead and will not eat any more bananas during this hour.
+
+Koko likes to eat slowly but still wants to finish eating all the bananas before the guards return.
+
+Return the minimum integer k such that she can eat all the bananas within h hours.
+
+
+
+</p>
+      </div>
+      <p>There’s a lot of fluff in there too. I think the first thing I find annoying is that the elaborate and uncompelling narrative makes it feels very contrived. What is this, the SAT?</p>
+      <p>Cutting through it all, essentially you need to find the minimum speed at which Koko can eat all the bananas in all of the piles before the guards return and wonder why they left all these bananas out unattended.
+      </p>
+      <p>Minimum speed implies that there might be more than one speed at which Koko can validly eat the bananas before the guards get back. What are those valid speeds?</p>
+      <p>Probably not anything negative, as Koko can’t produce bananas per house,  and not zero, since that is more of a fast from food rather than fast or slow eating. Given there is a max number of bananas in a pile, and she won’t focus on more than one pile in an hour, max(piles) is the max speed and 1 is the min speed. The answer is probably in there somewhere.</p>
+      <p>This is the first solution I came up with:</p>
+      <pre>
+        <code class="language-python inner-piece">
+          def can_koko_do_it(piles, bph, h):
+              return sum([(n // bph) + (1 if n % bph > 0 else 0) for n in piles]) <= h
+
+          class Solution:
+              def minEatingSpeed(self, piles: List[int], h: int) -> int:
+                  maxv = max(piles)
+                  for i in range(1, maxv):
+                      if can_koko_do_it(piles, i, h):
+                          return i
+                  return maxv
+
+        </code>
+      </pre>
+      <p>This passes all the testcases but fails on the actual submission. Why? It’s too slow. Leetcode times out with time limit exceeded. The input it fails on is h=690181675 and a list whose evaluation I won’t copy here but has a length of 10000 and values sum up to 5028836947650 . The guards are going to abandon Koko for approximately 78787 years with a food source known to spoil easily and which, even if it doesn’t, is going to give Koko hyperkalemia and diabetes. How are the guards even coming back? Are they vampires?  But I’m the one who doesn’t thing about edge cases, sure Leetcode, that seems reasonable.</p>
+      <p>At this point I googled what was going on and it turns out that this is a binary search problem. How? Why? Maybe you, my dear reader, are way smarter than me and can see how this is obviously a binary search problem, but I didn’t.</p>
+      <p>It involves going back to what the valid eating speeds are: 1 and max(piles) . By calling range(1, max(piles) you’re essentially creating a sorted array/list. And sorted input is,  like, the base requirement for binary search to work. A normal binary search returns True (or an index) if sought_value == list_input[index_under_consideration_right_now]  and simply does this in a way that is logarthmic by taking advantage of the fact that the input is sorted. We can do the same thing with Koko the Hyperkalemic.</p>
+      <p>Since range(…) gives us a sorted value, the only thing left to do to switch this up is: 1) figure out this particular problem’s boolean indicator and 2) figure out how to modify the index we’re considering. For (1) normal binary search compares the value at an index to the target; this one will need to compare the hours it takes to eat all the bananas at a specific speed to the hours the guards are away. This requires a slight tweak to the form and return of the can_koko_do_it function in my first example. Implementing (2) is pretty analogous to a normal binary search, namely, start in the middle and if the value is greater than the comparison to target, do one thing, and if it is lesser, do the other.</p>
+      <p>This is the solution that passes Leetcode:</p>
+      <pre>
+        <code class="language-python inner-piece">
+          def time_to_eat(bananas, bph):
+              return sum([(n // bph) + (1 if n % bph > 0 else 0) for n in bananas])
+
+          class Solution:
+              def minEatingSpeed(self, bananas: List[int], h: int) -> int:
+                  maxv = max(bananas)
+                  li, ri = 1, maxv
+                  koko_time = maxv
+                  while li <= ri:
+                      midi = (li + ri) // 2
+                      koko_luncheon = time_to_eat(bananas, midi)
+                      if koko_luncheon > h:
+                          li = midi + 1
+                      if koko_luncheon <= h:
+                          koko_time = min(koko_time, midi)
+                          ri = midi - 1
+                  return koko_time
+        </code>
+      </pre>
+      <p>I found this problem really annoying for all the reasons I was already snide about. It is O(log n), though, which is super cool. Something else that is probably worth doing is comparing this code that passes to the code for binary search in <a href="../coding-problems/leetcode_704.html">this leet code problem.</a>. If you notice, in that problem, I separated out bsi, or the code that finds the middle index, into a separate function. In that post I claimed that this is because I can never remember how to implement this middle index finding, which is true, but also, it's because I was planning to write these two posts one right after the other, so I knew that I would need to show how <i>finding the middle index</i> can be abstracted away based on what the prompt is. Basically, because there is a minimum and there is a maximum and you need to find a value that is <i>potentially</i> between that min and max, and because you can implement the sorting yourself with <b>range(...)</b> this becomes binary search with a twist.</p>
+      <script src="index.js"></script>
+      <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+  </body>
+</html>

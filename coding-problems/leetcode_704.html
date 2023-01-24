@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Leetcode #704</title>
+    <link rel="stylesheet" href="../style/style.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
+  </head>
+  <body>
+    <header>
+      <h3>Leetcode #704</h3>
+      <p class="byline">In my (unfinished) post-baccalaureate CS program I took a class on algorithms. At the time I was working a full time job, was a part time student, and caring for a family member with a broken collarbone. All of this was, perhaps, not a suitable environment for retaining the information I have learned. Join me on my journeys through leetcode, hacker rank, Cracking the Coding Interview, and Grokking Modern System Design as I try to retain some of this information in a more relaxed environment.</p>
+      <hr>
+    </header>
+    <div class="longform-body">
+      <p>This problem...is binary search. That's it. That's the problem. Binary search. That's all it is. It's not super tricky, or super annoying, it's a problem that is fundamental to computer science. So why do I always forget exactly how it is you calculate the middle index?</p>
+      <p>Let's talk about binary search really fast. You can find the Leetcode prompt <a href="https://leetcode.com/problems/binary-search/description/">here.</a> Here's the prompt:</p>
+      <div class="coding-prompt inner-piece">
+        <p>Given an array of integers nums which is sorted in ascending order, and an integer target, write a function to search target in nums. If target exists, then return its index. Otherwise, return -1.
+
+You must write an algorithm with O(log n) runtime complexity.
+
+</p>
+      </div>
+      <p>Now normally, I don't talk about the time complexity until the very end. Hint: this time complexity is going to be O(log n).</p>
+      <p>Binary search is the second word in it's name: it is a search. It allows you to search through a collection of things and find it, or confirm the thing is notthere , and it allows you to do so efficiently. In intro alogirthms classes, it usually is only about finding an integer in a list/array. It needs a few things to be true in order to work:</p>
+      <p>
+        <ul>
+          <li>It needs a sorted input (this is the list/array)</li>
+          <li>It needs the ability to evaluate greater-than-ness and less-than-ness (remembere I said that in intro classes the input is usually a list or array of integers)</li>
+        </ul>
+      </p>
+      <p>If those things are true, then binary search allows you to efficiently narrow your searching range. Consider a scenario where someone hands you a 500-page novel and asks you to find page 351. You Probably <i>wouldn't</i> go about doing this by counting from page 1 to 351. And you also probably wouldn't do it in reverse (by counting from page 500 to 351). You would probably flip to a page, roughly in the middle, look at it, and figure out if page 351 is higher or lower than the page you are on and adjust your next from there.</p>
+      <p>That is binary search.</p>
+      <p>So let's code it.</p>
+      <pre>
+        <code class="language-python inner-piece">
+          def bsi(li, ri):
+              return li + (ri - li)//2
+
+          class Solution:
+              def search(self, nums: List[int], target: int, previ=0) -> int:
+                  if not nums:
+                      return -1
+                  li, ri = 0, len(nums) - 1
+                  while li <= ri:
+                      midi = bsi(li, ri)
+                      if nums[midi] == target:
+                          return midi
+                      if nums[midi] > target:
+                          ri = midi - 1
+                      if nums[midi] < target:
+                          li = midi + 1
+                  return -1
+
+        </code>
+      </pre>
+      <p>I always forget how to implement the mid index find. Sometimes I will just do something like <b>(li + ri) // 2</b> which is close but not quite right. For this reason, I put it into it's own function, because it forces me to associate a name (bsi) with a specific operation. This is, in general, also how I like writing code; if something is important in terms of understanding business logic or logical flow, it should be namespaced.</p>
+      <p>Anyway, this is it. That's it! That's the binary search. This one isn't too bad. Unfortunately, Leetcode is full of horrors and will require us to implement this one in some weird ways.</p>
+      <p>Finally we should talk about <i>why</i> this is O(log n), instead of just stating that it is. A logarithm is the inverse function to exponentiation, which is a mathematical way of saying that for a given input <b>x</b>, the logairthm of <b>x</b> is the real number which needs to be the exponent of <b>x</b> in order to get a value <b>y</b>. Still too mathy? 2^3, or two cubed, is 8, and in this case 3 is the logarithm we need to apply to 2 in order to get 8.</p>
+      <p>Okay...so why is that important? Well, because, since logarthims are the inverse of exponents, it means they grow super slow in terms of time complexity, even more slowly than linear time (or O(n)). That's cool, I guess. I think I remember from my intro to algorithms class that most logarithms in computer science are base 2 unless otherwise stated (unlike math, where most logarithms are base 10 unless otherwise stated). I state that because I think it makes sense of why this is O(log n). Instead of considering every value in the input <b>b</b>, you half that input each time and halving is an operation that is 1/2...so base 2 makes sense.</p>
+      <p>This was super easy. Wish I could get something like this on an interview!</p>
+      <script src="index.js"></script>
+      <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+  </body>
+</html>
